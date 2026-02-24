@@ -1,6 +1,5 @@
 package com.example.library.forms;
 
-import com.example.library.Calculator;
 import com.example.library.RecIntegral;
 
 import javax.swing.*;
@@ -17,7 +16,7 @@ public class IntegralForm {
     private JButton btnDelete;
     private JButton btnCalculate;
     private JTable table1;
-
+    private boolean clrClicked;
     private JButton btnClear;
     private JButton btnFill;
 
@@ -32,17 +31,37 @@ public class IntegralForm {
             public boolean isCellEditable(int row, int column) {
                 return column != 3;
             }
+            @Override
+            public void setValueAt(Object aValue, int row, int column) {
+                super.setValueAt(aValue, row, column);
+
+                if (row >= 0 && row < listRecords.size() && column < 3) {
+
+                    double val = Double.parseDouble(aValue.toString());
+                    RecIntegral rec = listRecords.get(row);
+
+                    if (column == 0) rec.setLowerBound(val);
+                    else if (column == 1) rec.setUpperBound(val);
+                    else if (column == 2) rec.setStep(val);
+
+                    rec.setResult(0);
+                    super.setValueAt("", row, 3);
+
+                }
+            }
         };
         table1.setModel(model);
 
         btnAdd.addActionListener(e -> {
-            double low = Double.parseDouble(fieldLowerBound.getText());
-            double high = Double.parseDouble(fieldUpperBound.getText());
-            double step = Double.parseDouble(fieldStep.getText());
+            if (clrClicked == false) {
+                double low = Double.parseDouble(fieldLowerBound.getText());
+                double high = Double.parseDouble(fieldUpperBound.getText());
+                double step = Double.parseDouble(fieldStep.getText());
 
-            RecIntegral record = new RecIntegral(low, high, step, 0);
-            listRecords.add(record);
-            model.addRow(new Object[]{low, high, step, ""});
+                RecIntegral record = new RecIntegral(low, high, step, 0);
+                listRecords.add(record);
+                model.addRow(new Object[]{low, high, step, ""});
+            }
         });
 
         btnCalculate.addActionListener(e -> {
@@ -52,7 +71,7 @@ public class IntegralForm {
                 double right = Double.parseDouble(model.getValueAt(row, 1).toString());
                 double step = Double.parseDouble(model.getValueAt(row, 2).toString());
 
-                double res = Calculator.calculate(left, right, step);
+                double res = RecIntegral.calculate(left, right, step);
 
                 RecIntegral rec = listRecords.get(row);
                 rec.setResult(res);
@@ -73,11 +92,13 @@ public class IntegralForm {
         });
 
         btnClear.addActionListener(e -> {
+            clrClicked = true;
             model.setRowCount(0);
             //listRecords.clear();
         });
 
         btnFill.addActionListener(e -> {
+            clrClicked = false;
             model.setRowCount(0);
             for (RecIntegral rec : listRecords) {
                 String resStr = rec.getResult() == 0 ? "" : String.format("%.4f", rec.getResult());

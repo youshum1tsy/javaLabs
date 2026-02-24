@@ -8,7 +8,7 @@ public class Main {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                JFrame frame = new JFrame("Лабораторная работа");
+                JFrame frame = new JFrame("sin(x)");
 
                 IntegralForm form = new IntegralForm();
                 frame.setContentPane(form.getRootPanel());
