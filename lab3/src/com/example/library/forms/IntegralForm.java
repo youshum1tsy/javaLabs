@@ -40,13 +40,41 @@ public class IntegralForm {
                 }
                 try {
                     double val = Double.parseDouble(aValue.toString().replace(',', '.'));
+                    RecIntegral rec = listRecords.get(row);
+
+                    double high = rec.getUpperBound();
+                    double low = rec.getLowerBound();
+                    double step = rec.getStep();
                     if (val < 0.000001 || val > 1000000) {
-                        throw new InvalidDataException("Число " + val + " вне диапазона!");
+                        throw new InvalidDataException("Число " + val + " вне диапазона");
+                    }
+                    if (column == 0) {
+                        if (high - val < 0) {
+                            throw new InvalidDataException("Нижняя граница не может превышать верхнюю " + val + " > " + high);
+                        }
+                        if( high - val < step)
+                        {
+                            throw new InvalidDataException("Шаг не может быть больше интервала " + (high - val) + " < " + step);
+                        }
+                    }
+                    if (column == 1) {
+                        if (val - low < 0) {
+                            throw new InvalidDataException("Нижняя граница не может превышать верхнюю " + low + " > " + val);
+                        }
+                        if( val - low < step)
+                        {
+                            throw new InvalidDataException("Шаг не может быть больше интервала " + (val - low) + " < " + step);
+                        }
+                    }
+                    if (column == 2) {
+                        if( high - low < val)
+                        {
+                            throw new InvalidDataException("Шаг не может быть больше интервала " + (high - low) + " < " + val);
+                        }
                     }
                     super.setValueAt(aValue, row, column);
 
                     if (row >= 0 && row < listRecords.size()) {
-                        RecIntegral rec = listRecords.get(row);
                         if (column == 0) rec.setLowerBound(val);
                         else if (column == 1) rec.setUpperBound(val);
                         else if (column == 2) rec.setStep(val);
@@ -68,13 +96,19 @@ public class IntegralForm {
                 double low = Double.parseDouble(fieldLowerBound.getText());
                 double high = Double.parseDouble(fieldUpperBound.getText());
                 double step = Double.parseDouble(fieldStep.getText());
+                if (high - low < 0) {
+                    throw new InvalidDataException("Нижняя граница не может превышать верхнюю " + low + " > " + high);
+                }
+                if (high - low < step) {
+                    throw new InvalidDataException("Шаг не может быть больше интервала " + (high - low) + " < " + step);
+                }
                 RecIntegral record = new RecIntegral(low, high, step, 0);
 
                 listRecords.add(record);
                 model.addRow(new Object[]{low, high, step, ""});
 
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(rootPanel, "Введите числа!", "Ошибка типа", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(rootPanel, "Введите числа", "Ошибка формата", JOptionPane.ERROR_MESSAGE);
             } catch (InvalidDataException ex) {
                 JOptionPane.showMessageDialog(rootPanel, ex.getMessage(), "Некорректные данные", JOptionPane.WARNING_MESSAGE);
             }
@@ -98,7 +132,7 @@ public class IntegralForm {
                 model.setValueAt(String.format(java.util.Locale.US, "%.4f", res), row, 3);
 
             } catch (ArrayIndexOutOfBoundsException ex) {
-                JOptionPane.showMessageDialog(rootPanel, "Сначала выберите строку в таблице!", "Ошибка выбора", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(rootPanel, "Сначала выберите строку в таблице", "Ошибка выбора", JOptionPane.WARNING_MESSAGE);
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(rootPanel, "Ошибка: " + ex.getMessage());
             }
@@ -114,7 +148,7 @@ public class IntegralForm {
                 model.removeRow(row);
 
             } catch (ArrayIndexOutOfBoundsException ex) {
-                JOptionPane.showMessageDialog(rootPanel, "Нечего удалять: строка не выбрана!", "Ошибка удаления", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(rootPanel, "Нечего удалять: строка не выбрана", "Ошибка удаления", JOptionPane.WARNING_MESSAGE);
             }
         });
         btnClear.addActionListener(e -> {
