@@ -1,17 +1,15 @@
 package com.example.library;
 
 import static java.lang.Math.sin;
-
-import java.io.Externalizable;
 import java.io.Serializable;
 
 public class RecIntegral implements Serializable {
+    private static final long serialVersionUID = 1L;
     private double lowerBound;
     private double upperBound;
     private double step;
     private double result;
 
-    public RecIntegral() {}
 
     public RecIntegral(double lowerBound, double upperBound, double step, double result) throws InvalidDataException {
         checkValue(lowerBound);

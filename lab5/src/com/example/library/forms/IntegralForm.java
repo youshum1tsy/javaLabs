@@ -82,6 +82,7 @@ public class IntegralForm {
         };
         table1.setModel(model);
 
+        // Кнопка Добавить
         btnAdd.addActionListener(e -> {
             try {
                 double low = Double.parseDouble(fieldLowerBound.getText().replace(',', '.'));
@@ -99,6 +100,7 @@ public class IntegralForm {
             }
         });
 
+        // Кнопка Вычислить
         btnCalculate.addActionListener(e -> {
             try {
                 int row = table1.getSelectedRow();
@@ -116,6 +118,7 @@ public class IntegralForm {
             }
         });
 
+        // Кнопка Удалить
         btnDelete.addActionListener(e -> {
             int row = table1.getSelectedRow();
             if (row != -1) {
@@ -124,6 +127,7 @@ public class IntegralForm {
             }
         });
 
+        // Кнопки Очистить и Заполнить
         btnClear.addActionListener(e -> model.setRowCount(0));
         btnFill.addActionListener(e -> {
             model.setRowCount(0);
@@ -134,9 +138,12 @@ public class IntegralForm {
         });
     }
 
+    // --- ЛАБОРАТОРНАЯ №4: РАБОТА С ФАЙЛАМИ ---
 
     public void saveAsText() {
-        List<RecIntegral> toSave = listRecords.stream().collect(Collectors.toList());
+        List<RecIntegral> toSave = listRecords.stream()
+                .filter(r -> r.getResult() != 0)
+                .collect(Collectors.toList());
 
         if (toSave.isEmpty()) {
             JOptionPane.showMessageDialog(rootPanel, "Нет вычисленных данных для сохранения!");
@@ -147,6 +154,7 @@ public class IntegralForm {
         if (fc.showSaveDialog(rootPanel) == JFileChooser.APPROVE_OPTION) {
             try (FileWriter fw = new FileWriter(fc.getSelectedFile())) {
                 for (RecIntegral rec : toSave) {
+                    // Пишем данные через разделитель ;
                     fw.write(String.format(Locale.US, "%f;%f;%f;%f\n",
                             rec.getLowerBound(), rec.getUpperBound(), rec.getStep(), rec.getResult()));
                 }
@@ -187,6 +195,7 @@ public class IntegralForm {
 
     public void saveAsBinary() {
         List<RecIntegral> toSave = listRecords.stream()
+                .filter(r -> r.getResult() != 0)
                 .collect(Collectors.toList());
 
         if (toSave.isEmpty()) {
@@ -229,18 +238,7 @@ public class IntegralForm {
         }
     }
 
-
-    public void saveAsJson() {
-    }
-
-    public void loadFromJson() {
-
-    }
-
-
-
     public JPanel getRootPanel() {
         return rootPanel;
     }
-
 }

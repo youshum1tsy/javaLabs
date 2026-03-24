@@ -15,29 +15,25 @@ public class Main {
 
             JMenuItem itemSaveText = new JMenuItem("Сохранить в текст");
             JMenuItem itemLoadText = new JMenuItem("Загрузить из текста");
-            JMenuItem itemSaveBin = new JMenuItem("Сохранить (бинарно)");
-            JMenuItem itemLoadBin = new JMenuItem("Загрузить (бинарно)");
-            JMenuItem itemSaveJson = new JMenuItem("Сохранить (json)");
-            JMenuItem itemLoadJson = new JMenuItem("Загрузить (json)");
+            JMenuItem itemSaveBin  = new JMenuItem("Сохранить (бинарно)");
+            JMenuItem itemLoadBin  = new JMenuItem("Загрузить (бинарно)");
 
             itemSaveText.addActionListener(e -> form.saveAsText());
             itemLoadText.addActionListener(e -> form.loadFromText());
             itemSaveBin.addActionListener(e -> form.saveAsBinary());
             itemLoadBin.addActionListener(e -> form.loadFromBinary());
-            itemSaveJson.addActionListener(e -> form.saveAsJson());
-            itemLoadJson.addActionListener(e -> form.loadFromJson());
 
             fileMenu.add(itemSaveText);
             fileMenu.add(itemLoadText);
             fileMenu.addSeparator();
             fileMenu.add(itemSaveBin);
             fileMenu.add(itemLoadBin);
-            fileMenu.add(itemSaveJson);
-            fileMenu.add(itemLoadJson);
 
             menuBar.add(fileMenu);
 
+            // УСТАНАВЛИВАЕМ МЕНЮ В FRAME
             frame.setJMenuBar(menuBar);
+            // ---------------------
 
             frame.setContentPane(form.getRootPanel());
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
