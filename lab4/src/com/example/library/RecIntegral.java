@@ -2,10 +2,9 @@ package com.example.library;
 
 import static java.lang.Math.sin;
 
-import java.io.Externalizable;
-import java.io.Serializable;
+import java.io.*;
 
-public class RecIntegral implements Serializable {
+public class RecIntegral implements Externalizable  {
     private double lowerBound;
     private double upperBound;
     private double step;
@@ -22,6 +21,22 @@ public class RecIntegral implements Serializable {
         this.upperBound = upperBound;
         this.step = step;
         this.result = result;
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeDouble(lowerBound);
+        out.writeDouble(upperBound);
+        out.writeDouble(step);
+        out.writeDouble(result);
+    }
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException {
+        this.lowerBound = in.readDouble();
+        this.upperBound = in.readDouble();
+        this.step = in.readDouble();
+        this.result = in.readDouble();
     }
 
     private void checkValue(double val) throws InvalidDataException {
@@ -60,4 +75,5 @@ public class RecIntegral implements Serializable {
         }
         return result;
     }
+
 }

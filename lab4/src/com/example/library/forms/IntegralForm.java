@@ -5,6 +5,7 @@ import com.example.library.RecIntegral;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.*;
@@ -231,10 +232,115 @@ public class IntegralForm {
 
 
     public void saveAsJson() {
+        // Сохраняем только те записи, которые были вычислены (результат != 0)
+        List<RecIntegral> toSave = listRecords.stream().collect(Collectors.toList());
+
+        if (toSave.isEmpty()) {
+            JOptionPane.showMessageDialog(rootPanel, "Нет вычисленных данных для сохранения!");
+            return;
+        }
+
+        JFileChooser fc = new JFileChooser();
+        if (fc.showSaveDialog(rootPanel) == JFileChooser.APPROVE_OPTION) {
+            try (PrintWriter out = new PrintWriter(fc.getSelectedFile())) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("[\n"); // Начало массива
+
+                for (int i = 0; i < toSave.size(); i++) {
+                    RecIntegral rec = toSave.get(i);
+                    sb.append("  {\n");
+                    sb.append(String.format(Locale.US, "    \"lowerBound\": %f,\n", rec.getLowerBound()));
+                    sb.append(String.format(Locale.US, "    \"upperBound\": %f,\n", rec.getUpperBound()));
+                    sb.append(String.format(Locale.US, "    \"step\": %f,\n", rec.getStep()));
+                    sb.append(String.format(Locale.US, "    \"result\": %f\n", rec.getResult()));
+                    sb.append("  }");
+
+                    if (i < toSave.size() - 1) {
+                        sb.append(",");
+                    }
+                    sb.append("\n");
+                }
+                sb.append("]");
+
+                out.print(sb.toString());
+                JOptionPane.showMessageDialog(rootPanel, "Данные успешно сохранены в JSON!");
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(rootPanel, "Ошибка сохранения: " + e.getMessage());
+            }
+        }
     }
 
     public void loadFromJson() {
+        JFileChooser fc = new JFileChooser();
+        if (fc.showOpenDialog(rootPanel) == JFileChooser.APPROVE_OPTION) {
+            try {
+                String content = new String(Files.readAllBytes(fc.getSelectedFile().toPath()));
 
+                content = content.trim();
+                if (content.startsWith("[")) content = content.substring(1);
+                if (content.endsWith("]")) content = content.substring(0, content.length() - 1);
+                content = content.trim();
+
+                if (content.isEmpty()) {
+                    JOptionPane.showMessageDialog(rootPanel, "Файл пуст");
+                    return;
+                }
+
+                listRecords.clear();
+                model.setRowCount(0);
+
+                String[] objects = content.split("(?<=\\}),");
+
+                for (String objStr : objects) {
+                    objStr = objStr.trim();
+                    if (objStr.isEmpty()) continue;
+
+                    double low = extractJsonValue(objStr, "lowerBound");
+                    double high = extractJsonValue(objStr, "upperBound");
+                    double step = extractJsonValue(objStr, "step");
+                    double res = extractJsonValue(objStr, "result");
+
+                    RecIntegral rec = new RecIntegral(low, high, step, res);
+                    listRecords.add(rec);
+
+                    String resStr = (res == 0) ? "" : String.format(Locale.US, "%.4f", res);
+                    model.addRow(new Object[]{low, high, step, resStr});
+                }
+
+                JOptionPane.showMessageDialog(rootPanel, "Данные успешно загружены из JSON!");
+
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(rootPanel, "Ошибка при разборе JSON: " + e.getMessage());
+            }
+        }
+    }
+
+    private double extractJsonValue(String json, String key) {
+
+        String searchKey = "\"" + key + "\":";
+        int startPos = json.indexOf(searchKey);
+
+        if (startPos == -1) return 0;
+
+        startPos += searchKey.length();
+
+        int endPos = json.indexOf(",", startPos);
+        if (endPos == -1) {
+            endPos = json.indexOf("}", startPos);
+        }
+        if (endPos == -1) {
+            endPos = json.length();
+        }
+
+        String value = json.substring(startPos, endPos).trim();
+
+        value = value.replace("\"", "");
+
+        try {
+            return Double.parseDouble(value);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 
 
